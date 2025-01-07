@@ -7,7 +7,7 @@ interface Point {
 }
 
 interface DopamineWaveProps {
-  pattern: 'natural' | 'cocaine' | 'chocolate' | 'exercise';
+  pattern: 'natural' | 'cocaine' | 'chocolate' | 'exercise' | 'normal';
 }
 
 const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
@@ -21,13 +21,34 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     const newPoints: Point[] = [];
     const baselineY = height / 2;
     
-    // Generate more points than visible to allow for smooth scrolling
     for (let x = 0; x < width + 100; x += 5) {
-      // Combine multiple sine waves for a more natural feel, offset by xOffset
       const y = baselineY + 
         Math.sin((x + xOffset) * 0.02) * 15 + 
         Math.sin((x + xOffset) * 0.01) * 10;
       newPoints.push({ x, y });
+    }
+    return newPoints;
+  };
+
+  const generateNormalDayWave = (xOffset: number) => {
+    const newPoints: Point[] = [];
+    const baselineY = height / 2;
+    
+    for (let x = 0; x < width + 100; x += 5) {
+      // Simulate daily fluctuations with multiple frequencies
+      const timeOfDay = ((x + xOffset) % width) / width * 24; // Map x to 24 hours
+      
+      // Morning spike
+      const morningSpike = Math.max(0, 20 * Math.exp(-(Math.pow(timeOfDay - 8, 2)) / 2));
+      
+      // Afternoon dip
+      const afternoonDip = -10 * Math.exp(-(Math.pow(timeOfDay - 14, 2)) / 8);
+      
+      // Evening moderate level
+      const eveningLevel = 5 * Math.sin((timeOfDay - 18) * 0.5);
+      
+      const y = baselineY + morningSpike + afternoonDip + eveningLevel;
+      newPoints.push({ x, y: Math.max(10, Math.min(height - 10, y)) });
     }
     return newPoints;
   };
@@ -105,10 +126,12 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     let animationFrameId: number;
     
     const animate = () => {
-      setOffset(prev => (prev + 2) % width); // Increase this value for faster movement
+      setOffset(prev => (prev + 2) % width);
       
       if (pattern === 'natural') {
         setPoints(generateNaturalWave(offset));
+      } else if (pattern === 'normal') {
+        setPoints(generateNormalDayWave(offset));
       } else {
         setPoints(generateStimulusWave(pattern, offset));
       }
@@ -118,7 +141,7 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     
     animationFrameId = requestAnimationFrame(animate);
     
-    if (pattern !== 'natural') {
+    if (pattern !== 'natural' && pattern !== 'normal') {
       const timer = setTimeout(() => {
         setPoints(generateNaturalWave(offset));
       }, 20000);
@@ -142,7 +165,7 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
         <motion.path
           d={pathData}
           fill="none"
-          stroke="rgba(255,255,255,0.8)"
+          stroke="rgba(0,0,0,0.6)"
           strokeWidth="2"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
