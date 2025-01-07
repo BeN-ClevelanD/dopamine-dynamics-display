@@ -14,33 +14,34 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
   const [points, setPoints] = useState<Point[]>([]);
   const [height, setHeight] = useState(300);
   const [width, setWidth] = useState(800);
+  const [offset, setOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const generateNaturalWave = () => {
+  const generateNaturalWave = (xOffset: number) => {
     const newPoints: Point[] = [];
     const baselineY = height / 2;
     
-    for (let x = 0; x < width; x += 5) {
-      // Combine multiple sine waves for a more natural feel
+    // Generate more points than visible to allow for smooth scrolling
+    for (let x = 0; x < width + 100; x += 5) {
+      // Combine multiple sine waves for a more natural feel, offset by xOffset
       const y = baselineY + 
-        Math.sin(x * 0.02) * 15 + 
-        Math.sin(x * 0.01) * 10;
+        Math.sin((x + xOffset) * 0.02) * 15 + 
+        Math.sin((x + xOffset) * 0.01) * 10;
       newPoints.push({ x, y });
     }
     return newPoints;
   };
 
-  const generateStimulusWave = (type: 'cocaine' | 'chocolate' | 'exercise') => {
+  const generateStimulusWave = (type: 'cocaine' | 'chocolate' | 'exercise', xOffset: number) => {
     const newPoints: Point[] = [];
     const baselineY = height / 2;
     
-    // Define characteristics for each stimulus type
     const patterns = {
       cocaine: {
-        peakHeight: 0.8, // 80% of available height
-        peakPosition: 0.2, // Peak at 20% of width
-        decayRate: 2.5, // Steep decay
-        afterTroughDepth: 0.6 // Deep post-high trough
+        peakHeight: 0.8,
+        peakPosition: 0.2,
+        decayRate: 2.5,
+        afterTroughDepth: 0.6
       },
       chocolate: {
         peakHeight: 0.4,
@@ -58,23 +59,19 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     
     const { peakHeight, peakPosition, decayRate, afterTroughDepth } = patterns[type];
     
-    for (let x = 0; x < width; x += 5) {
+    // Generate more points than visible to allow for smooth scrolling
+    for (let x = 0; x < width + 100; x += 5) {
       let y;
-      const xProgress = x / width;
+      const xProgress = ((x + xOffset) % width) / width;
       
       if (xProgress < peakPosition) {
-        // Rising phase - smooth acceleration
         const riseProgress = xProgress / peakPosition;
         y = baselineY - (Math.pow(riseProgress, 2) * height * peakHeight);
       } else if (xProgress < peakPosition + 0.1) {
-        // Peak plateau
         y = baselineY - height * peakHeight;
       } else {
-        // Decay and after-effects phase
         const decayProgress = (xProgress - (peakPosition + 0.1)) / 0.9;
         const decayValue = Math.exp(-decayProgress * decayRate);
-        
-        // Add the trough effect
         const troughEffect = Math.sin(decayProgress * Math.PI) * afterTroughDepth;
         
         y = baselineY - 
@@ -82,9 +79,7 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
             (height * troughEffect);
       }
       
-      // Ensure the wave stays within bounds
       y = Math.max(10, Math.min(height - 10, y));
-      
       newPoints.push({ x, y });
     }
     return newPoints;
@@ -107,24 +102,17 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
   }, []);
 
   useEffect(() => {
-    let newPoints: Point[];
     let animationFrameId: number;
-    let startTime: number;
     
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = timestamp - startTime;
+    const animate = () => {
+      setOffset(prev => (prev + 2) % width); // Increase this value for faster movement
       
       if (pattern === 'natural') {
-        newPoints = generateNaturalWave().map(point => ({
-          x: point.x,
-          y: point.y + Math.sin(progress * 0.002) * 5
-        }));
+        setPoints(generateNaturalWave(offset));
       } else {
-        newPoints = generateStimulusWave(pattern);
+        setPoints(generateStimulusWave(pattern, offset));
       }
       
-      setPoints(newPoints);
       animationFrameId = requestAnimationFrame(animate);
     };
     
@@ -132,7 +120,7 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     
     if (pattern !== 'natural') {
       const timer = setTimeout(() => {
-        setPoints(generateNaturalWave());
+        setPoints(generateNaturalWave(offset));
       }, 20000);
       
       return () => {
@@ -142,7 +130,7 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     }
     
     return () => cancelAnimationFrame(animationFrameId);
-  }, [pattern, width, height]);
+  }, [pattern, width, height, offset]);
 
   const pathData = points.length > 0
     ? `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
