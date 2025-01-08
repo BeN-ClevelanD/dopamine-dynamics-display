@@ -18,7 +18,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
       <nav className="border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between">
           <div className="flex-1" />
@@ -60,10 +60,9 @@ const Index = () => {
             <button
               key={pattern}
               onClick={() => handlePatternClick(pattern)}
-              className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
-                bg-secondary text-secondary-foreground hover:bg-secondary/80
-                active:bg-primary active:text-primary-foreground
-              `}
+              className="w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
+                bg-card text-card-foreground hover:bg-card/80
+                active:bg-primary active:text-primary-foreground"
             >
               {pattern.charAt(0).toUpperCase() + pattern.slice(1)}
             </button>

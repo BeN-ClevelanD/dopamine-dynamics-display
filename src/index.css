@@ -34,6 +34,36 @@
  
     --radius: 0.5rem;
   }
+
+  .dark {
+    --background: 0 0% 13%; /* #222222 */
+    --foreground: 0 0% 100%; /* White text */
+ 
+    --card: 0 0% 33%; /* #555555 */
+    --card-foreground: 0 0% 100%;
+ 
+    --popover: 0 0% 33%;
+    --popover-foreground: 0 0% 100%;
+ 
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 13%;
+ 
+    --secondary: 0 0% 33%;
+    --secondary-foreground: 0 0% 100%;
+ 
+    --muted: 0 0% 33%;
+    --muted-foreground: 0 0% 63%;
+ 
+    --accent: 0 0% 33%;
+    --accent-foreground: 0 0% 100%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --border: 0 0% 33%;
+    --input: 0 0% 33%;
+    --ring: 0 0% 83%;
+  }
 }
  
 @layer base {
@@ -41,15 +71,14 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
   }
 }
 
 .wave-container {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.025) 100%);
-  backdrop-filter: blur(10px);
+  @apply bg-card rounded-lg transition-colors duration-300;
 }
 
 .wave-line {

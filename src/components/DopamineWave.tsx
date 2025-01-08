@@ -178,12 +178,12 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     : '';
 
   return (
-    <div ref={containerRef} className="wave-container w-full h-full rounded-lg">
+    <div ref={containerRef} className="wave-container w-full h-full">
       <svg width="100%" height="100%" className="overflow-visible">
         <motion.path
           d={pathData}
           fill="none"
-          stroke="rgba(0,0,0,0.6)"
+          className="stroke-foreground"
           strokeWidth="2"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
