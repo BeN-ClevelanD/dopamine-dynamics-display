@@ -39,48 +39,49 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     const newPoints: Point[] = [];
     const baselineY = height / 2;
     
+    // Updated patterns to reflect relative percentages and speeds
     const patterns = {
       cocaine: {
         peakHeight: 2.25, // 225% above baseline
         peakPosition: 0.1,
-        decayRate: 3.0,
-        afterTroughDepth: 0.4,
-        riseSpeed: 0.8
+        decayRate: 3.0, // Fast decay
+        afterTroughDepth: 0.4, // Significant drop below baseline
+        riseSpeed: 0.8 // Very fast rise
       },
       amphetamine: {
         peakHeight: 10.0, // 1000% above baseline
         peakPosition: 0.15,
-        decayRate: 1.5,
-        afterTroughDepth: 0.6,
-        riseSpeed: 0.9
+        decayRate: 1.5, // Slower decay than cocaine
+        afterTroughDepth: 0.6, // Deeper drop below baseline
+        riseSpeed: 0.9 // Fastest rise
       },
       chocolate: {
         peakHeight: 0.5, // 50% above baseline
         peakPosition: 0.3,
-        decayRate: 0.8,
+        decayRate: 0.8, // Moderate decay
         afterTroughDepth: 0.0, // No drop below baseline
-        riseSpeed: 0.4
+        riseSpeed: 0.4 // Moderate rise
       },
       exercise: {
         peakHeight: 0.4, // 40% above baseline
         peakPosition: 0.4,
-        decayRate: 0.5,
-        afterTroughDepth: 0.0,
-        riseSpeed: 0.3
+        decayRate: 0.5, // Slow, gradual decay
+        afterTroughDepth: 0.0, // No drop below baseline
+        riseSpeed: 0.3 // Gradual rise
       },
       videogames: {
         peakHeight: 1.0, // 100% above baseline
         peakPosition: 0.25,
-        decayRate: 0.7,
-        afterTroughDepth: 0.1,
-        riseSpeed: 0.5
+        decayRate: 0.7, // Moderate decay
+        afterTroughDepth: 0.1, // Slight drop below baseline
+        riseSpeed: 0.5 // Moderate rise
       },
       sex: {
         peakHeight: 1.0, // 100% above baseline
         peakPosition: 0.2,
-        decayRate: 2.0,
-        afterTroughDepth: 0.0,
-        riseSpeed: 0.6
+        decayRate: 2.0, // Fast decay after peak
+        afterTroughDepth: 0.0, // No significant drop below baseline
+        riseSpeed: 0.6 // Moderate-fast rise
       },
       normal: {
         peakHeight: 0.2,
