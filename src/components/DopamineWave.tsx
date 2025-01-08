@@ -7,7 +7,7 @@ interface Point {
 }
 
 interface DopamineWaveProps {
-  pattern: 'natural' | 'cocaine' | 'chocolate' | 'exercise' | 'normal';
+  pattern: 'cocaine' | 'chocolate' | 'exercise' | 'normal';
 }
 
 const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
