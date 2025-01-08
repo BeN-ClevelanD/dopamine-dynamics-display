@@ -15,20 +15,9 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
   const [height, setHeight] = useState(300);
   const [width, setWidth] = useState(800);
   const [offset, setOffset] = useState(0);
+  const [transitionProgress, setTransitionProgress] = useState(1);
+  const previousPattern = useRef(pattern);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const generateNaturalWave = (xOffset: number) => {
-    const newPoints: Point[] = [];
-    const baselineY = height / 2;
-    
-    for (let x = 0; x < width + 100; x += 5) {
-      const y = baselineY + 
-        Math.sin((x + xOffset) * 0.02) * 15 + 
-        Math.sin((x + xOffset) * 0.01) * 10;
-      newPoints.push({ x, y });
-    }
-    return newPoints;
-  };
 
   const generateNormalDayWave = (xOffset: number) => {
     const newPoints: Point[] = [];
@@ -53,7 +42,7 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     return newPoints;
   };
 
-  const generateStimulusWave = (type: 'cocaine' | 'chocolate' | 'exercise', xOffset: number) => {
+  const generateStimulusWave = (type: 'cocaine' | 'chocolate' | 'exercise', xOffset: number, progress: number = 1) => {
     const newPoints: Point[] = [];
     const baselineY = height / 2;
     
@@ -84,20 +73,25 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
       let y;
       const xProgress = ((x + xOffset) % width) / width;
       
+      // Only show one peak
       if (xProgress < peakPosition) {
         const riseProgress = xProgress / peakPosition;
-        y = baselineY - (Math.pow(riseProgress, 2) * height * peakHeight);
+        y = baselineY - (Math.pow(riseProgress, 2) * height * peakHeight * progress);
       } else if (xProgress < peakPosition + 0.1) {
-        y = baselineY - height * peakHeight;
+        y = baselineY - height * peakHeight * progress;
       } else {
         const decayProgress = (xProgress - (peakPosition + 0.1)) / 0.9;
         const decayValue = Math.exp(-decayProgress * decayRate);
         const troughEffect = Math.sin(decayProgress * Math.PI) * afterTroughDepth;
         
         y = baselineY - 
-            (height * peakHeight * decayValue) + 
-            (height * troughEffect);
+            (height * peakHeight * decayValue * progress) + 
+            (height * troughEffect * progress);
       }
+      
+      // Blend with normal pattern based on progress
+      const normalY = generateNormalDayWave(xOffset)[Math.floor(x/5)].y;
+      y = y * progress + normalY * (1 - progress);
       
       y = Math.max(10, Math.min(height - 10, y));
       newPoints.push({ x, y });
@@ -124,24 +118,32 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
   useEffect(() => {
     let animationFrameId: number;
     
+    if (pattern !== previousPattern.current) {
+      setTransitionProgress(1);
+      previousPattern.current = pattern;
+    }
+    
     const animate = () => {
       setOffset(prev => (prev + 2) % width);
       
-      if (pattern === 'natural') {
-        setPoints(generateNaturalWave(offset));
-      } else if (pattern === 'normal') {
+      if (pattern === 'normal') {
         setPoints(generateNormalDayWave(offset));
       } else {
-        setPoints(generateStimulusWave(pattern, offset));
+        // If it's a stimulus pattern, gradually transition back to normal
+        if (transitionProgress > 0) {
+          setPoints(generateStimulusWave(pattern, offset, transitionProgress));
+          setTransitionProgress(prev => Math.max(0, prev - 0.005)); // Gradual transition
+        } else {
+          setPoints(generateNormalDayWave(offset));
+        }
       }
       
       animationFrameId = requestAnimationFrame(animate);
     };
     
     animationFrameId = requestAnimationFrame(animate);
-    
     return () => cancelAnimationFrame(animationFrameId);
-  }, [pattern, width, height, offset]);
+  }, [pattern, width, height, offset, transitionProgress]);
 
   const pathData = points.length > 0
     ? `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`
