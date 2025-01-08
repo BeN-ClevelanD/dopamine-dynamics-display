@@ -80,7 +80,6 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     
     const { peakHeight, peakPosition, decayRate, afterTroughDepth } = patterns[type];
     
-    // Generate more points than visible to allow for smooth scrolling
     for (let x = 0; x < width + 100; x += 5) {
       let y;
       const xProgress = ((x + xOffset) % width) / width;
@@ -140,17 +139,6 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     };
     
     animationFrameId = requestAnimationFrame(animate);
-    
-    if (pattern !== 'natural' && pattern !== 'normal') {
-      const timer = setTimeout(() => {
-        setPoints(generateNaturalWave(offset));
-      }, 20000);
-      
-      return () => {
-        clearTimeout(timer);
-        cancelAnimationFrame(animationFrameId);
-      };
-    }
     
     return () => cancelAnimationFrame(animationFrameId);
   }, [pattern, width, height, offset]);

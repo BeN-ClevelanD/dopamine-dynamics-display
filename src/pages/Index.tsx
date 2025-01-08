@@ -3,11 +3,15 @@ import DopamineWave from '../components/DopamineWave';
 import { motion } from 'framer-motion';
 
 const Index = () => {
-  const [activePattern, setActivePattern] = useState<'natural' | 'cocaine' | 'chocolate' | 'exercise' | 'normal'>('natural');
+  const [activePattern, setActivePattern] = useState<'natural' | 'cocaine' | 'chocolate' | 'exercise' | 'normal'>('normal');
 
   const handlePatternClick = (pattern: typeof activePattern) => {
-    if (pattern !== activePattern) {
+    if (pattern !== 'normal') {
       setActivePattern(pattern);
+      // Reset to normal pattern after a delay
+      setTimeout(() => {
+        setActivePattern('normal');
+      }, 20000); // 20 seconds total for the effect and return to normal
     }
   };
 
@@ -46,15 +50,14 @@ const Index = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          {(['normal', 'cocaine', 'chocolate', 'exercise'] as const).map((pattern) => (
+          {(['cocaine', 'chocolate', 'exercise'] as const).map((pattern) => (
             <button
               key={pattern}
               onClick={() => handlePatternClick(pattern)}
-              className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                activePattern === pattern
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+              className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
+                bg-secondary text-secondary-foreground hover:bg-secondary/80
+                active:bg-primary active:text-primary-foreground
+              `}
             >
               {pattern.charAt(0).toUpperCase() + pattern.slice(1)}
             </button>
