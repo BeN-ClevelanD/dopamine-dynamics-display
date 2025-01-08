@@ -7,7 +7,7 @@ interface Point {
 }
 
 interface DopamineWaveProps {
-  pattern: 'cocaine' | 'chocolate' | 'exercise' | 'normal';
+  pattern: 'cocaine' | 'chocolate' | 'exercise' | 'normal' | 'amphetamine' | 'videogames' | 'sex';
 }
 
 const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
@@ -24,16 +24,9 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     const baselineY = height / 2;
     
     for (let x = 0; x < width + 100; x += 5) {
-      // Simulate daily fluctuations with multiple frequencies
-      const timeOfDay = ((x + xOffset) % width) / width * 24; // Map x to 24 hours
-      
-      // Morning spike
+      const timeOfDay = ((x + xOffset) % width) / width * 24;
       const morningSpike = Math.max(0, 20 * Math.exp(-(Math.pow(timeOfDay - 8, 2)) / 2));
-      
-      // Afternoon dip
       const afternoonDip = -10 * Math.exp(-(Math.pow(timeOfDay - 14, 2)) / 8);
-      
-      // Evening moderate level
       const eveningLevel = 5 * Math.sin((timeOfDay - 18) * 0.5);
       
       const y = baselineY + morningSpike + afternoonDip + eveningLevel;
@@ -42,44 +35,78 @@ const DopamineWave: React.FC<DopamineWaveProps> = ({ pattern }) => {
     return newPoints;
   };
 
-  const generateStimulusWave = (type: 'cocaine' | 'chocolate' | 'exercise', xOffset: number, progress: number = 1) => {
+  const generateStimulusWave = (type: DopamineWaveProps['pattern'], xOffset: number, progress: number = 1) => {
     const newPoints: Point[] = [];
     const baselineY = height / 2;
     
     const patterns = {
       cocaine: {
-        peakHeight: 0.8,
-        peakPosition: 0.2,
-        decayRate: 2.5,
-        afterTroughDepth: 0.6
+        peakHeight: 2.25, // 225% above baseline
+        peakPosition: 0.1,
+        decayRate: 3.0,
+        afterTroughDepth: 0.4,
+        riseSpeed: 0.8
+      },
+      amphetamine: {
+        peakHeight: 10.0, // 1000% above baseline
+        peakPosition: 0.15,
+        decayRate: 1.5,
+        afterTroughDepth: 0.6,
+        riseSpeed: 0.9
       },
       chocolate: {
-        peakHeight: 0.4,
+        peakHeight: 0.5, // 50% above baseline
         peakPosition: 0.3,
-        decayRate: 1.2,
-        afterTroughDepth: 0.2
+        decayRate: 0.8,
+        afterTroughDepth: 0.0, // No drop below baseline
+        riseSpeed: 0.4
       },
       exercise: {
-        peakHeight: 0.5,
+        peakHeight: 0.4, // 40% above baseline
         peakPosition: 0.4,
-        decayRate: 0.8,
-        afterTroughDepth: 0.1
+        decayRate: 0.5,
+        afterTroughDepth: 0.0,
+        riseSpeed: 0.3
+      },
+      videogames: {
+        peakHeight: 1.0, // 100% above baseline
+        peakPosition: 0.25,
+        decayRate: 0.7,
+        afterTroughDepth: 0.1,
+        riseSpeed: 0.5
+      },
+      sex: {
+        peakHeight: 1.0, // 100% above baseline
+        peakPosition: 0.2,
+        decayRate: 2.0,
+        afterTroughDepth: 0.0,
+        riseSpeed: 0.6
+      },
+      normal: {
+        peakHeight: 0.2,
+        peakPosition: 0.3,
+        decayRate: 0.5,
+        afterTroughDepth: 0.0,
+        riseSpeed: 0.3
       }
     };
     
-    const { peakHeight, peakPosition, decayRate, afterTroughDepth } = patterns[type];
+    const { peakHeight, peakPosition, decayRate, afterTroughDepth, riseSpeed } = patterns[type];
     
     for (let x = 0; x < width + 100; x += 5) {
       let y;
       const xProgress = ((x + xOffset) % width) / width;
       
-      // Only show one peak
+      // Single peak with customized rise and fall
       if (xProgress < peakPosition) {
-        const riseProgress = xProgress / peakPosition;
-        y = baselineY - (Math.pow(riseProgress, 2) * height * peakHeight * progress);
+        // Rise phase with customizable speed
+        const riseProgress = Math.pow(xProgress / peakPosition, riseSpeed);
+        y = baselineY - (height * peakHeight * riseProgress * progress);
       } else if (xProgress < peakPosition + 0.1) {
+        // Peak plateau
         y = baselineY - height * peakHeight * progress;
       } else {
+        // Decay phase with customizable trough
         const decayProgress = (xProgress - (peakPosition + 0.1)) / 0.9;
         const decayValue = Math.exp(-decayProgress * decayRate);
         const troughEffect = Math.sin(decayProgress * Math.PI) * afterTroughDepth;
